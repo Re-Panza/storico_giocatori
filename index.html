@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://re-panza.github.io/lk_tool/icona.png">
+
+    <title>Cronologia Giocatore - L&K Tool</title>
+
+    <script src="https://re-panza.github.io/lk_tool/version.js"></script>
+    <script>
+        if (typeof APP_VERSION !== 'undefined') {
+            document.write(`<link rel="manifest" href="https://re-panza.github.io/lk_tool/manifest.json?v=${APP_VERSION}">`);
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #111c33;
+            --muted: #93a4c7;
+            --text: #e8eefc;
+            --accent: #60a5fa;
+            --border: rgba(255, 255, 255, .10);
+            --success: #34d399;
+            --danger: #ef4444;
+            --dangerBg: rgba(239, 68, 68, .12);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(1200px 600px at 20% 0%, rgba(96, 165, 250, .25), transparent 60%),
+                radial-gradient(1000px 500px at 90% 10%, rgba(52, 211, 153, .18), transparent 55%),
+                var(--bg);
+            color: var(--text);
+            padding: env(safe-area-inset-top, 20px) 20px 40px 20px;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(17, 28, 51, .80);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 32px 24px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
+        }
+
+        .nav-header {
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-home {
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        .page-title {
+            max-width: 500px;
+            margin: 0 auto 24px auto;
+            text-align: left;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 15px;
+            color: var(--muted);
+            padding-left: 4px;
+        }
+
+        .search-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-option span {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .05);
+            color: var(--text);
+            outline: none;
+            font-size: 16px;
+            font-family: inherit;
+            -webkit-user-select: text;
+            user-select: text;
+            transition: border-color 0.2s;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        #errorBanner {
+            display: none;
+            margin-bottom: 20px;
+            border: 1px solid rgba(239, 68, 68, .4);
+            background: var(--dangerBg);
+            color: #ffcfcf;
+            border-radius: 16px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .btn-cerca {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            border: none;
+            font-weight: 800;
+            font-size: 17px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: #0f172a;
+            margin-bottom: 12px;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn-cerca:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* Stile Risultati Cronologia */
+        #risultati {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, .03);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-content {
+            font-size: 15px;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .history-highlight {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .history-type-icon {
+            font-size: 18px;
+            margin-right: 6px;
+        }
+
+        .paypal-footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .paypal-link {
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            color: #fff !important;
+            background: #0070ba;
+            padding: 12px 28px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 112, 186, 0.3);
+            border: none;
+        }
+
+        /* --- STILE ASSISTENTE COPIATO --- */
+        #ai-assistant-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        #ai-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 2px solid var(--accent);
+        }
+
+        #ai-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #ai-window {
+            display: none;
+            position: absolute;
+            bottom: 85px;
+            right: 0;
+            width: 85vw;
+            max-width: 320px;
+            background: var(--card);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-header {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        #ai-content {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .ai-input-area {
+            display: flex;
+            gap: 5px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        #ai-input {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 5px;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        #ai-send-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav-header">
+        <a href="https://re-panza.github.io/lk_tool/index.html" class="btn-home">🏠 Torna alla Home</a>
+    </div>
+
+    <div class="page-title">
+        <h2>📜 Storico Giocatore</h2>
+        <div class="search-options">
+            <div class="search-option">👤 <span>Cambi Nome</span></div>
+            <div class="search-option">🛡️ <span>Cambi Alleanza</span></div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div id="errorBanner">⚠️ Incolla un link giocatore 'l+k://player...' valido.</div>
+
+        <input type="text" id="inputText" placeholder="Incolla il link l+k del giocatore qui...">
+
+        <button class="btn-cerca" onclick="startSearch()">CERCA CRONOLOGIA</button>
+
+        <div id="risultati"></div>
+    </div>
+
+    <footer class="paypal-footer">
+        <p style="font-size:12px; color:#93a4c7; margin-bottom:8px; font-family: sans-serif;">
+            Ti piace questo strumento?
+        </p>
+        <a href="https://paypal.me/Longo11" target="_blank" class="paypal-link">
+            ☕ Offrimi un caffè su PayPal
+        </a>
+    </footer>
+
+    <div id="ai-assistant-container">
+        <div id="ai-window">
+            <div class="ai-header">
+                <span>👑 Assistente Re Panza</span>
+                <span onclick="toggleAI()" style="cursor:pointer">×</span>
+            </div>
+            <div id="ai-content">
+                <p>Ciao! Sono Re Panza AI. Chiedimi pure consiglio se non comprendi il gioco, oppure chiacchieriamo un pò.</p>
+            </div>
+            <div class="ai-input-area">
+                <input type="text" id="ai-input" placeholder="Scrivi al Re...">
+                <button id="ai-send-btn" onclick="chiediAlRe()">Invia</button>
+            </div>
+        </div>
+        <div id="ai-button" onclick="toggleAI()">
+            <img src="https://re-panza.github.io/lk_tool/re-panza-ai.png" alt="Re Panza AI">
+        </div>
+    </div>
+
+    <script src="https://re-panza.github.io/lk_tool/common.js"></script>
+
+    <script>
+        function formatTimestamp(unixTime) {
+            const date = new Date(unixTime * 1000);
+            const g = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const a = date.getFullYear();
+            const ore = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${g}/${m}/${a} alle ${ore}:${min}`;
+        }
+
+        async function startSearch() {
+            const input = document.getElementById('inputText').value;
+            const resDiv = document.getElementById('risultati');
+            const errorBanner = document.getElementById('errorBanner');
+
+            resDiv.innerHTML = "";
+            errorBanner.style.display = "none";
+
+            // Trova link giocatore
+            let parsedLink = typeof parseLK === 'function' ? parseLK(input) : null;
+            if (!parsedLink && typeof parseInputLink === 'function') {
+                let p = parseInputLink(input);
+                if (p && p.type === 'player') parsedLink = { p: p.id, w: p.w };
+            }
+
+            if (!parsedLink || !parsedLink.p || !parsedLink.w) {
+                // Fallback manuale con regex universale
+                const match = input.match(/(?:l\+k:\/\/|https?:\/\/.*?)player\?(\d+)&(\d+)/i);
+                if (match) {
+                    parsedLink = { p: match[1], w: match[2] };
+                } else {
+                    errorBanner.style.display = "block";
+                    return;
+                }
+            }
+
+            const playerId = parseInt(parsedLink.p);
+            const mondoStr = String(parsedLink.w).trim();
+            
+            resDiv.innerHTML = `<div style="text-align:center; color:var(--gold);">⏳ Ricerca nella biblioteca reale in corso...</div>`;
+
+            // Configurazione Link Database
+            let urlCronologia;
+            if (mondoStr === "327") {
+                urlCronologia = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/cronologia_327.json";
+            } else {
+                urlCronologia = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/cronologia_${mondoStr}.json`;
+            }
+
+            try {
+                const response = await fetch(urlCronologia + "?v=" + Date.now());
+                if (!response.ok) {
+                    throw new Error("File cronologia non trovato per questo mondo.");
+                }
+                
+                const historyData = await response.json();
+                
+                // Filtriamo gli eventi solo del giocatore richiesto e ordiniamo dal più recente al più vecchio
+                const playerEvents = historyData
+                    .filter(e => e.p === playerId)
+                    .sort((a, b) => b.d - a.d);
+
+                if (playerEvents.length === 0) {
+                    resDiv.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,0.02);">Nessun cambiamento registrato per questo giocatore nel Mondo ${mondoStr}.</div>`;
+                    return;
+                }
+
+                resDiv.innerHTML = ""; // Puliamo il loading
+
+                playerEvents.forEach(event => {
+                    const dataFormattata = formatTimestamp(event.d);
+                    const div = document.createElement('div');
+                    div.className = 'history-card';
+                    
+                    if (event.type === 'name') {
+                        div.innerHTML = `
+                            <div class="history-date">📅 ${dataFormattata}</div>
+                            <div class="history-content">
+                                <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
+                                Da <span class="history-highlight">"${event.old}"</span> a <span class="history-highlight">"${event.new}"</span>
+                            </div>
+                        `;
+                    } else if (event.type === 'alliance') {
+                        const oldName = event.old_name ? ` (${event.old_name})` : '';
+                        const newName = event.new_name ? ` (${event.new_name})` : '';
+                        
+                        // Gestiamo se esce o entra in una alleanza (da 0 o a 0)
+                        let textDesc = "";
+                        if (event.old === 0) {
+                            textDesc = `È entrato nell'alleanza <span class="history-highlight">${event.new}${newName}</span>`;
+                        } else if (event.new === 0) {
+                            textDesc = `Ha lasciato l'alleanza <span class="history-highlight">${event.old}${oldName}</span>`;
+                        } else {
+                            textDesc = `Ha cambiato alleanza:<br>Da <span class="history-highlight">${event.old}${oldName}</span> a <span class="history-highlight">${event.new}${newName}</span>`;
+                        }
+
+                        div.innerHTML = `
+                            <div class="history-date">📅 ${dataFormattata}</div>
+                            <div class="history-content">
+                                <span class="history-type-icon">🛡️</span> ${textDesc}
+                            </div>
+                        `;
+                    }
+                    
+                    resDiv.appendChild(div);
+                });
+
+            } catch (err) {
+                console.error(err);
+                resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${err.message}</span></div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
