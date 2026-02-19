@@ -29,6 +29,7 @@
             --success: #34d399;
             --danger: #ef4444;
             --dangerBg: rgba(239, 68, 68, .12);
+            --gold: #fbbf24;
         }
 
         * {
@@ -115,11 +116,60 @@
             font-weight: 500;
         }
 
-        textarea, input[type="text"] {
+        /* TABS UI */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 10px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+        }
+
+        /* SEZIONI NASCOSTE DI DEFAULT */
+        .search-section {
+            display: none;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 16px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .search-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input[type="text"], 
+        .search-section select {
             width: 100%;
             padding: 16px;
-            margin-bottom: 20px;
-            border-radius: 16px;
+            margin-bottom: 16px;
+            border-radius: 12px;
             border: 1px solid var(--border);
             background: rgba(255, 255, 255, .05);
             color: var(--text);
@@ -131,13 +181,22 @@
             transition: border-color 0.2s;
         }
 
-        textarea {
-            height: 100px;
-            resize: none;
+        input[type="text"]:focus, 
+        .search-section select:focus {
+            border-color: var(--accent);
         }
 
-        textarea:focus, input[type="text"]:focus {
-            border-color: var(--accent);
+        .search-section select {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2393a4c7' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        .search-section select option {
+            background: var(--bg);
+            color: var(--text);
         }
 
         #errorBanner {
@@ -146,7 +205,7 @@
             border: 1px solid rgba(239, 68, 68, .4);
             background: var(--dangerBg);
             color: #ffcfcf;
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 14px;
             font-size: 14px;
             font-weight: 600;
@@ -155,15 +214,14 @@
 
         .btn-cerca {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             background: var(--accent);
             border: none;
             font-weight: 800;
-            font-size: 17px;
-            border-radius: 16px;
+            font-size: 16px;
+            border-radius: 12px;
             cursor: pointer;
             color: #0f172a;
-            margin-bottom: 12px;
             transition: transform 0.1s, opacity 0.2s;
         }
 
@@ -174,7 +232,7 @@
 
         /* Stile Risultati Cronologia */
         #risultati {
-            margin-top: 24px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -188,6 +246,17 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        .history-event {
+            margin-bottom: 8px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        
+        .history-event:last-child {
+            margin-bottom: 0;
         }
 
         .history-date {
@@ -205,7 +274,7 @@
         }
 
         .history-highlight {
-            color: #fbbf24;
+            color: var(--gold);
             font-weight: bold;
         }
 
@@ -237,7 +306,7 @@
             border: none;
         }
 
-        /* --- STILE ASSISTENTE COPIATO --- */
+        /* --- STILE ASSISTENTE --- */
         #ai-assistant-container {
             position: fixed;
             bottom: 20px;
@@ -343,11 +412,28 @@
 
     <div class="container">
 
-        <div id="errorBanner">⚠️ Incolla un link giocatore 'l+k://player...' valido.</div>
+        <div class="tabs">
+            <button id="btnTabPlayer" class="tab-btn" onclick="switchTab('player')">👤 Ricerca Giocatore</button>
+            <button id="btnTabWorld" class="tab-btn" onclick="switchTab('world')">🌍 Ricerca per Mondo</button>
+        </div>
 
-        <input type="text" id="inputText" placeholder="Incolla il link l+k del giocatore qui...">
+        <div id="errorBanner">⚠️ Attenzione: Messaggio di errore generico.</div>
 
-        <button class="btn-cerca" onclick="startSearch()">CERCA CRONOLOGIA</button>
+        <div id="sectionPlayer" class="search-section">
+            <input type="text" id="inputText" placeholder="Incolla link l+k del giocatore...">
+            <button class="btn-cerca" onclick="startSearch('player')">CERCA GIOCATORE</button>
+        </div>
+
+        <div id="sectionWorld" class="search-section">
+            <select id="worldSelect">
+                <option value="">Seleziona un mondo...</option>
+                <option value="327">Italia VI (regioni)</option>
+                <option value="337">Italia 15</option>
+                <option value="343">Italia VII (regioni)</option>
+                <option value="296">Italia V</option>
+            </select>
+            <button class="btn-cerca" onclick="startSearch('world')">ESPLORA MONDO</button>
+        </div>
 
         <div id="risultati"></div>
     </div>
@@ -383,6 +469,32 @@
     <script src="https://re-panza.github.io/lk_tool/common.js"></script>
 
     <script>
+        // Mappa per tradurre il numero mondo al nome pulito
+        const worldNamesMap = {
+            "327": "Italia VI (regioni)",
+            "337": "Italia 15",
+            "343": "Italia VII (regioni)",
+            "296": "Italia V"
+        };
+
+        function switchTab(tabId) {
+            document.getElementById('sectionPlayer').classList.remove('active');
+            document.getElementById('sectionWorld').classList.remove('active');
+            document.getElementById('btnTabPlayer').classList.remove('active');
+            document.getElementById('btnTabWorld').classList.remove('active');
+            
+            document.getElementById('errorBanner').style.display = 'none';
+            document.getElementById('risultati').innerHTML = '';
+
+            if(tabId === 'player') {
+                document.getElementById('sectionPlayer').classList.add('active');
+                document.getElementById('btnTabPlayer').classList.add('active');
+            } else if (tabId === 'world') {
+                document.getElementById('sectionWorld').classList.add('active');
+                document.getElementById('btnTabWorld').classList.add('active');
+            }
+        }
+
         function formatTimestamp(unixTime) {
             const date = new Date(unixTime * 1000);
             const g = String(date.getDate()).padStart(2, '0');
@@ -393,107 +505,211 @@
             return `${g}/${m}/${a} alle ${ore}:${min}`;
         }
 
-        async function startSearch() {
-            const input = document.getElementById('inputText').value;
+        async function startSearch(mode) {
             const resDiv = document.getElementById('risultati');
             const errorBanner = document.getElementById('errorBanner');
 
             resDiv.innerHTML = "";
             errorBanner.style.display = "none";
 
-            // Trova link giocatore
-            let parsedLink = typeof parseLK === 'function' ? parseLK(input) : null;
-            if (!parsedLink && typeof parseInputLink === 'function') {
-                let p = parseInputLink(input);
-                if (p && p.type === 'player') parsedLink = { p: p.id, w: p.w };
-            }
+            let playerId = null;
+            let mondoStr = null;
+            let displayWorldName = "";
 
-            if (!parsedLink || !parsedLink.p || !parsedLink.w) {
-                // Fallback manuale con regex universale
-                const match = input.match(/(?:l\+k:\/\/|https?:\/\/.*?)player\?(\d+)&(\d+)/i);
-                if (match) {
-                    parsedLink = { p: match[1], w: match[2] };
-                } else {
+            if (mode === 'player') {
+                const input = document.getElementById('inputText').value.trim();
+                if (input === "") {
                     errorBanner.style.display = "block";
+                    errorBanner.innerText = "⚠️ Incolla un link giocatore valido.";
                     return;
                 }
-            }
 
-            const playerId = parseInt(parsedLink.p);
-            const mondoStr = String(parsedLink.w).trim();
+                let parsedLink = typeof parseLK === 'function' ? parseLK(input) : null;
+                if (!parsedLink && typeof parseInputLink === 'function') {
+                    let p = parseInputLink(input);
+                    if (p && p.type === 'player') parsedLink = { p: p.id, w: p.w };
+                }
+
+                if (!parsedLink || !parsedLink.p || !parsedLink.w) {
+                    const match = input.match(/(?:l\+k:\/\/|https?:\/\/.*?)player\?(\d+)&(\d+)/i);
+                    if (match) {
+                        parsedLink = { p: match[1], w: match[2] };
+                    } else {
+                        errorBanner.style.display = "block";
+                        errorBanner.innerText = "⚠️ Incolla un link giocatore valido.";
+                        return;
+                    }
+                }
+                
+                playerId = parseInt(parsedLink.p);
+                mondoStr = String(parsedLink.w).trim();
+                displayWorldName = worldNamesMap[mondoStr] || `Mondo ${mondoStr}`;
+
+            } else if (mode === 'world') {
+                const selectEl = document.getElementById('worldSelect');
+                const selectedWorld = selectEl.value;
+                if (!selectedWorld) {
+                    errorBanner.style.display = "block";
+                    errorBanner.innerText = "⚠️ Seleziona un mondo dal menu a tendina.";
+                    return;
+                }
+                mondoStr = selectedWorld;
+                displayWorldName = selectEl.options[selectEl.selectedIndex].text;
+            }
             
             resDiv.innerHTML = `<div style="text-align:center; color:var(--gold);">⏳ Ricerca nella biblioteca reale in corso...</div>`;
 
-            // Configurazione Link Database
-            let urlCronologia;
+            let urlCronologia, urlDatabase;
             if (mondoStr === "327") {
                 urlCronologia = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/cronologia_327.json";
+                urlDatabase = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/database_327.json";
             } else {
                 urlCronologia = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/cronologia_${mondoStr}.json`;
+                urlDatabase = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/database_${mondoStr}.json`;
             }
 
             try {
-                const response = await fetch(urlCronologia + "?v=" + Date.now());
-                if (!response.ok) {
+                const [resCronologia, resDatabase] = await Promise.all([
+                    fetch(urlCronologia + "?v=" + Date.now()),
+                    fetch(urlDatabase + "?v=" + Date.now()).catch(() => null)
+                ]);
+
+                if (!resCronologia.ok) {
                     throw new Error("File cronologia non trovato per questo mondo.");
                 }
                 
-                const historyData = await response.json();
+                const historyData = await resCronologia.json();
                 
-                // Filtriamo gli eventi solo del giocatore richiesto e ordiniamo dal più recente al più vecchio
-                const playerEvents = historyData
-                    .filter(e => e.p === playerId)
-                    .sort((a, b) => b.d - a.d);
-
-                if (playerEvents.length === 0) {
-                    resDiv.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,0.02);">Nessun cambiamento registrato per questo giocatore nel Mondo ${mondoStr}.</div>`;
-                    return;
+                let playersDb = [];
+                if (resDatabase && resDatabase.ok) {
+                    playersDb = await resDatabase.json();
                 }
 
-                resDiv.innerHTML = ""; // Puliamo il loading
+                const playerMap = {};
+                if (Array.isArray(playersDb)) {
+                    playersDb.forEach(p => {
+                        let id = p.p || p.id;
+                        playerMap[id] = {
+                            pn: p.pn,
+                            an: p.an || ""
+                        };
+                    });
+                }
 
-                playerEvents.forEach(event => {
-                    const dataFormattata = formatTimestamp(event.d);
-                    const div = document.createElement('div');
-                    div.className = 'history-card';
+                resDiv.innerHTML = "";
+
+                if (playerId) {
+                    const playerEvents = historyData[playerId] || [];
                     
-                    if (event.type === 'name') {
-                        div.innerHTML = `
-                            <div class="history-date">📅 ${dataFormattata}</div>
-                            <div class="history-content">
-                                <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
-                                Da <span class="history-highlight">"${event.old}"</span> a <span class="history-highlight">"${event.new}"</span>
-                            </div>
-                        `;
-                    } else if (event.type === 'alliance') {
-                        const oldName = event.old_name ? ` (${event.old_name})` : '';
-                        const newName = event.new_name ? ` (${event.new_name})` : '';
-                        
-                        // Gestiamo se esce o entra in una alleanza (da 0 o a 0)
-                        let textDesc = "";
-                        if (event.old === 0) {
-                            textDesc = `È entrato nell'alleanza <span class="history-highlight">${event.new}${newName}</span>`;
-                        } else if (event.new === 0) {
-                            textDesc = `Ha lasciato l'alleanza <span class="history-highlight">${event.old}${oldName}</span>`;
-                        } else {
-                            textDesc = `Ha cambiato alleanza:<br>Da <span class="history-highlight">${event.old}${oldName}</span> a <span class="history-highlight">${event.new}${newName}</span>`;
-                        }
-
-                        div.innerHTML = `
-                            <div class="history-date">📅 ${dataFormattata}</div>
-                            <div class="history-content">
-                                <span class="history-type-icon">🛡️</span> ${textDesc}
-                            </div>
-                        `;
+                    if (playerEvents.length === 0) {
+                        resDiv.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,0.02);">Nessun cambiamento registrato per questo giocatore nel mondo ${displayWorldName}.</div>`;
+                        return;
                     }
+
+                    playerEvents.sort((a, b) => b.d - a.d);
                     
-                    resDiv.appendChild(div);
-                });
+                    // Recupero nome senza usare sconosciuto o id
+                    let pName = "";
+                    let pAlliance = "";
+                    if (playerMap[playerId]) {
+                        pName = playerMap[playerId].pn;
+                        pAlliance = playerMap[playerId].an;
+                    } else {
+                        const lastCard = playerEvents.find(e => e.type === 'name');
+                        pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                    }
+
+                    resDiv.innerHTML += `<div style="margin-bottom: 12px; font-size: 18px; font-weight: 800; color: var(--accent);">👤 ${pName} <span style="font-size: 14px; font-weight: normal; color: var(--muted);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>`;
+
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    renderEvents(playerEvents, card);
+                    resDiv.appendChild(card);
+                } 
+                else {
+                    const allIds = Object.keys(historyData);
+                    
+                    if (allIds.length === 0) {
+                        resDiv.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,0.02);">La cronologia per il mondo ${displayWorldName} è al momento vuota.</div>`;
+                        return;
+                    }
+
+                    resDiv.innerHTML += `<div style="margin-bottom: 16px; font-size: 16px; font-weight: bold; color: var(--success);">🌐 Trovati ${allIds.length} giocatori nel mondo ${displayWorldName}:</div>`;
+
+                    allIds.forEach(id => {
+                        const playerEvents = historyData[id];
+                        playerEvents.sort((a, b) => b.d - a.d);
+                        
+                        let pName = "";
+                        let pAlliance = "";
+                        if (playerMap[id]) {
+                            pName = playerMap[id].pn;
+                            pAlliance = playerMap[id].an;
+                        } else {
+                            const lastCard = playerEvents.find(e => e.type === 'name');
+                            pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                        }
+                        
+                        const pCard = document.createElement('div');
+                        pCard.className = 'history-card';
+                        pCard.style.marginBottom = "15px";
+                        pCard.style.borderColor = "var(--accent)";
+                        
+                        pCard.innerHTML = `
+                            <div style="font-size: 16px; font-weight: bold; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
+                                👤 ${pName} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span>
+                            </div>
+                        `;
+                        
+                        renderEvents(playerEvents, pCard);
+                        resDiv.appendChild(pCard);
+                    });
+                }
 
             } catch (err) {
                 console.error(err);
                 resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${err.message}</span></div>`;
             }
+        }
+
+        function renderEvents(events, container) {
+            events.forEach(event => {
+                const dataFormattata = formatTimestamp(event.d);
+                const div = document.createElement('div');
+                div.className = 'history-event';
+                
+                if (event.type === 'name') {
+                    div.innerHTML = `
+                        <div class="history-date">📅 ${dataFormattata}</div>
+                        <div class="history-content">
+                            <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
+                            Da <span class="history-highlight">"${event.old}"</span> a <span class="history-highlight">"${event.new}"</span>
+                        </div>
+                    `;
+                } else if (event.type === 'alliance') {
+                    // Utilizza solo i nomi estratti per le alleanze, mai gli ID numerici
+                    const oldNameDisplay = event.old_name ? event.old_name : (event.old === 0 ? "Nessuna" : "Alleanza Rimossa");
+                    const newNameDisplay = event.new_name ? event.new_name : (event.new === 0 ? "Nessuna" : "Alleanza Rimossa");
+                    
+                    let textDesc = "";
+                    if (event.old === 0) {
+                        textDesc = `È entrato nell'alleanza <span class="history-highlight">${newNameDisplay}</span>`;
+                    } else if (event.new === 0) {
+                        textDesc = `Ha lasciato l'alleanza <span class="history-highlight">${oldNameDisplay}</span>`;
+                    } else {
+                        textDesc = `Ha cambiato alleanza:<br>Da <span class="history-highlight">${oldNameDisplay}</span> a <span class="history-highlight">${newNameDisplay}</span>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="history-date">📅 ${dataFormattata}</div>
+                        <div class="history-content">
+                            <span class="history-type-icon">🛡️</span> ${textDesc}
+                        </div>
+                    `;
+                }
+                
+                container.appendChild(div);
+            });
         }
     </script>
 </body>
