@@ -689,6 +689,15 @@
 
                     resDiv.innerHTML += `<div style="margin-bottom: 16px; font-size: 16px; font-weight: bold; color: var(--success);">🌐 Trovati ${allIds.length} giocatori nel mondo ${displayWorldName}:</div>`;
 
+                    // --- MODIFICA AGGIUNTA QUI ---
+                    // Ordino gli ID dei giocatori in base alla data dell'evento più recente al loro interno.
+                    allIds.sort((idA, idB) => {
+                        const maxDA = Math.max(...historyData[idA].map(e => e.d));
+                        const maxDB = Math.max(...historyData[idB].map(e => e.d));
+                        return maxDB - maxDA; // Ordine decrescente (dal più recente al più vecchio)
+                    });
+                    // -----------------------------
+
                     allIds.forEach(id => {
                         const playerEvents = historyData[id];
                         playerEvents.sort((a, b) => b.d - a.d);
