@@ -560,12 +560,13 @@
             resDiv.innerHTML = `<div style="text-align:center; color:var(--gold);">⏳ Ricerca nella biblioteca reale in corso...</div>`;
 
             let urlCronologia, urlDatabase;
+            // Corretti i percorsi URL affinché cerchino esattamente i file come da tua direttiva
             if (mondoStr === "327") {
                 urlCronologia = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/cronologia_327.json";
-                urlDatabase = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/database_327.json";
+                urlDatabase = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/database_mondo_327.json";
             } else {
                 urlCronologia = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/cronologia_${mondoStr}.json`;
-                urlDatabase = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/database_${mondoStr}.json`;
+                urlDatabase = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/database_mondo_${mondoStr}.json`;
             }
 
             try {
@@ -590,11 +591,14 @@
                     const processPlayer = (p, keyId) => {
                         let id = p.p || p.id || keyId;
                         if (id) {
-                            // Assicuriamoci che l'ID sia una stringa per incrociarlo perfettamente con historyData
+                            let newA = parseInt(p.a) || 0;
+                            let current = playerMap[String(id)] || { pn: "", an: "", a: 0 };
+                            
+                            // Mappatura esclusiva su p.pn, p.an, p.a
                             playerMap[String(id)] = {
-                                pn: p.pn || "",
-                                an: p.an || "",
-                                a: parseInt(p.a) || 0 // Forza il valore a numero
+                                pn: p.pn || current.pn,
+                                an: p.an || current.an,
+                                a: newA > 0 ? newA : current.a 
                             };
                         }
                     };
@@ -620,7 +624,6 @@
 
                     playerEvents.sort((a, b) => b.d - a.d);
                     
-                    // Recupero nome da db, o evento, altrimenti sconosciuto
                     let pName = "";
                     let pAlliance = "";
                     let pAllianceId = 0;
@@ -639,7 +642,6 @@
                         }
                     }
 
-                    // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
                     if (!pAllianceId || pAllianceId === 0) {
                         const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
                         if (lastAllyCard && lastAllyCard.new !== 0) {
@@ -695,7 +697,6 @@
                             }
                         }
 
-                        // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
                         if (!pAllianceId || pAllianceId === 0) {
                             const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
                             if (lastAllyCard && lastAllyCard.new !== 0) {
