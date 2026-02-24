@@ -580,21 +580,32 @@
                 
                 const historyData = await resCronologia.json();
                 
-                let playersDb = [];
+                let playersDb = null;
                 if (resDatabase && resDatabase.ok) {
                     playersDb = await resDatabase.json();
                 }
 
                 const playerMap = {};
-                if (Array.isArray(playersDb)) {
-                    playersDb.forEach(p => {
-                        let id = p.p || p.id;
-                        playerMap[id] = {
-                            pn: p.pn,
-                            an: p.an || "",
-                            a: p.a || 0 // Salviamo anche l'ID alleanza
-                        };
-                    });
+                if (playersDb) {
+                    const processPlayer = (p, keyId) => {
+                        let id = p.p || p.id || keyId;
+                        if (id) {
+                            // Assicuriamoci che l'ID sia una stringa per incrociarlo perfettamente con historyData
+                            playerMap[String(id)] = {
+                                pn: p.pn || "",
+                                an: p.an || "",
+                                a: parseInt(p.a) || 0 // Forza il valore a numero
+                            };
+                        }
+                    };
+
+                    if (Array.isArray(playersDb)) {
+                        playersDb.forEach(p => processPlayer(p, null));
+                    } else if (typeof playersDb === 'object') {
+                        for (let key in playersDb) {
+                            processPlayer(playersDb[key], key);
+                        }
+                    }
                 }
 
                 resDiv.innerHTML = "";
@@ -614,10 +625,10 @@
                     let pAlliance = "";
                     let pAllianceId = 0;
 
-                    if (playerMap[playerId]) {
-                        pName = playerMap[playerId].pn;
-                        pAlliance = playerMap[playerId].an;
-                        pAllianceId = playerMap[playerId].a;
+                    if (playerMap[String(playerId)]) {
+                        pName = playerMap[String(playerId)].pn;
+                        pAlliance = playerMap[String(playerId)].an;
+                        pAllianceId = playerMap[String(playerId)].a;
                     } else {
                         const evName = playerEvents.find(e => e.pn_html || e.pn);
                         if (evName) {
@@ -629,7 +640,7 @@
                     }
 
                     // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
-                    if (!pAllianceId) {
+                    if (!pAllianceId || pAllianceId === 0) {
                         const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
                         if (lastAllyCard && lastAllyCard.new !== 0) {
                             pAllianceId = lastAllyCard.new;
@@ -642,7 +653,7 @@
                             <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${pName} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
                             <div style="margin-top: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 4px;">
                                 <a href="l+k://player?${playerId}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${playerId}&${mondoStr}</a>
-                                ${pAllianceId && parseInt(pAllianceId) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
+                                ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
                             </div>
                         </div>
                     `;
@@ -670,10 +681,10 @@
                         let pAlliance = "";
                         let pAllianceId = 0;
 
-                        if (playerMap[id]) {
-                            pName = playerMap[id].pn;
-                            pAlliance = playerMap[id].an;
-                            pAllianceId = playerMap[id].a;
+                        if (playerMap[String(id)]) {
+                            pName = playerMap[String(id)].pn;
+                            pAlliance = playerMap[String(id)].an;
+                            pAllianceId = playerMap[String(id)].a;
                         } else {
                             const evName = playerEvents.find(e => e.pn_html || e.pn);
                             if (evName) {
@@ -685,7 +696,7 @@
                         }
 
                         // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
-                        if (!pAllianceId) {
+                        if (!pAllianceId || pAllianceId === 0) {
                             const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
                             if (lastAllyCard && lastAllyCard.new !== 0) {
                                 pAllianceId = lastAllyCard.new;
@@ -703,7 +714,7 @@
                                 <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${pName} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
                                 <div style="margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
                                     <a href="l+k://player?${id}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${id}&${mondoStr}</a>
-                                    ${pAllianceId && parseInt(pAllianceId) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
+                                    ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
                                 </div>
                             </div>
                         `;
