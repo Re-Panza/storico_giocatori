@@ -591,7 +591,8 @@
                         let id = p.p || p.id;
                         playerMap[id] = {
                             pn: p.pn,
-                            an: p.an || ""
+                            an: p.an || "",
+                            a: p.a || 0 // Salviamo anche l'ID alleanza
                         };
                     });
                 }
@@ -611,9 +612,12 @@
                     // Recupero nome da db, o evento, altrimenti sconosciuto
                     let pName = "";
                     let pAlliance = "";
+                    let pAllianceId = 0;
+
                     if (playerMap[playerId]) {
                         pName = playerMap[playerId].pn;
                         pAlliance = playerMap[playerId].an;
+                        pAllianceId = playerMap[playerId].a;
                     } else {
                         const evName = playerEvents.find(e => e.pn_html || e.pn);
                         if (evName) {
@@ -624,7 +628,24 @@
                         }
                     }
 
-                    resDiv.innerHTML += `<div style="margin-bottom: 12px; font-size: 18px; font-weight: 800; color: var(--accent);">👤 <a href="l+k://player?${playerId}&${mondoStr}" style="color:inherit; text-decoration:underline;">${pName}</a> <span style="font-size: 14px; font-weight: normal; color: var(--muted);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>`;
+                    // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
+                    if (!pAllianceId) {
+                        const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
+                        if (lastAllyCard && lastAllyCard.new !== 0) {
+                            pAllianceId = lastAllyCard.new;
+                            if (!pAlliance) pAlliance = lastAllyCard.new_name || "";
+                        }
+                    }
+
+                    resDiv.innerHTML += `
+                        <div style="margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border);">
+                            <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${pName} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
+                            <div style="margin-top: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 4px;">
+                                <a href="l+k://player?${playerId}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${playerId}&${mondoStr}</a>
+                                ${pAllianceId ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
+                            </div>
+                        </div>
+                    `;
 
                     const card = document.createElement('div');
                     card.className = 'history-card';
@@ -647,9 +668,12 @@
                         
                         let pName = "";
                         let pAlliance = "";
+                        let pAllianceId = 0;
+
                         if (playerMap[id]) {
                             pName = playerMap[id].pn;
                             pAlliance = playerMap[id].an;
+                            pAllianceId = playerMap[id].a;
                         } else {
                             const evName = playerEvents.find(e => e.pn_html || e.pn);
                             if (evName) {
@@ -659,6 +683,15 @@
                                 pName = lastCard ? lastCard.new : "Giocatore Eliminato";
                             }
                         }
+
+                        // Se non abbiamo l'ID alleanza dal DB, cerchiamo l'ultimo evento alleanza
+                        if (!pAllianceId) {
+                            const lastAllyCard = playerEvents.find(e => e.type === 'alliance');
+                            if (lastAllyCard && lastAllyCard.new !== 0) {
+                                pAllianceId = lastAllyCard.new;
+                                if (!pAlliance) pAlliance = lastAllyCard.new_name || "";
+                            }
+                        }
                         
                         const pCard = document.createElement('div');
                         pCard.className = 'history-card';
@@ -666,8 +699,12 @@
                         pCard.style.borderColor = "var(--accent)";
                         
                         pCard.innerHTML = `
-                            <div style="font-size: 16px; font-weight: bold; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
-                                👤 <a href="l+k://player?${id}&${mondoStr}" style="color:inherit; text-decoration:underline;">${pName}</a> <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span>
+                            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 8px;">
+                                <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${pName} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
+                                <div style="margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
+                                    <a href="l+k://player?${id}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${id}&${mondoStr}</a>
+                                    ${pAllianceId ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
+                                </div>
                             </div>
                         `;
                         
