@@ -608,18 +608,23 @@
 
                     playerEvents.sort((a, b) => b.d - a.d);
                     
-                    // Recupero nome senza usare sconosciuto o id
+                    // Recupero nome da db, o evento, altrimenti sconosciuto
                     let pName = "";
                     let pAlliance = "";
                     if (playerMap[playerId]) {
                         pName = playerMap[playerId].pn;
                         pAlliance = playerMap[playerId].an;
                     } else {
-                        const lastCard = playerEvents.find(e => e.type === 'name');
-                        pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                        const evName = playerEvents.find(e => e.pn_html || e.pn);
+                        if (evName) {
+                            pName = evName.pn_html || evName.pn;
+                        } else {
+                            const lastCard = playerEvents.find(e => e.type === 'name');
+                            pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                        }
                     }
 
-                    resDiv.innerHTML += `<div style="margin-bottom: 12px; font-size: 18px; font-weight: 800; color: var(--accent);">👤 <a href="l+k://player?${playerId}&${mondoStr}" style="color:inherit; text-decoration:none;">${pName}</a> <span style="font-size: 14px; font-weight: normal; color: var(--muted);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>`;
+                    resDiv.innerHTML += `<div style="margin-bottom: 12px; font-size: 18px; font-weight: 800; color: var(--accent);">👤 <a href="l+k://player?${playerId}&${mondoStr}" style="color:inherit; text-decoration:underline;">${pName}</a> <span style="font-size: 14px; font-weight: normal; color: var(--muted);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>`;
 
                     const card = document.createElement('div');
                     card.className = 'history-card';
@@ -646,8 +651,13 @@
                             pName = playerMap[id].pn;
                             pAlliance = playerMap[id].an;
                         } else {
-                            const lastCard = playerEvents.find(e => e.type === 'name');
-                            pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                            const evName = playerEvents.find(e => e.pn_html || e.pn);
+                            if (evName) {
+                                pName = evName.pn_html || evName.pn;
+                            } else {
+                                const lastCard = playerEvents.find(e => e.type === 'name');
+                                pName = lastCard ? lastCard.new : "Giocatore Eliminato";
+                            }
                         }
                         
                         const pCard = document.createElement('div');
@@ -657,7 +667,7 @@
                         
                         pCard.innerHTML = `
                             <div style="font-size: 16px; font-weight: bold; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
-                                👤 <a href="l+k://player?${id}&${mondoStr}" style="color:inherit; text-decoration:none;">${pName}</a> <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span>
+                                👤 <a href="l+k://player?${id}&${mondoStr}" style="color:inherit; text-decoration:underline;">${pName}</a> <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span>
                             </div>
                         `;
                         
@@ -691,7 +701,7 @@
                     const oldNameDisplay = event.old_name ? event.old_name : (event.old === 0 ? "Nessuna" : "Alleanza Rimossa");
                     const newNameDisplay = event.new_name ? event.new_name : (event.new === 0 ? "Nessuna" : "Alleanza Rimossa");
                     
-                    // Creazione dei link cliccabili
+                    // Creazione dei link cliccabili con text-decoration:underline per renderli evidenti
                     const oldLink = event.old !== 0 ? `<a href="l+k://alliance?${event.old}&${mondoStr}" style="color:inherit; text-decoration:underline;">${oldNameDisplay}</a>` : oldNameDisplay;
                     const newLink = event.new !== 0 ? `<a href="l+k://alliance?${event.new}&${mondoStr}" style="color:inherit; text-decoration:underline;">${newNameDisplay}</a>` : newNameDisplay;
 
