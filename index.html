@@ -689,17 +689,26 @@
 
                     resDiv.innerHTML += `<div style="margin-bottom: 16px; font-size: 16px; font-weight: bold; color: var(--success);">🌐 Trovati ${allIds.length} giocatori nel mondo ${displayWorldName}:</div>`;
 
-                    // --- MODIFICA AGGIUNTA QUI ---
-                    // Ordino gli ID dei giocatori in base alla data dell'evento più recente al loro interno.
-                    allIds.sort((idA, idB) => {
-                        const maxDA = Math.max(...historyData[idA].map(e => e.d));
-                        const maxDB = Math.max(...historyData[idB].map(e => e.d));
-                        return maxDB - maxDA; // Ordine decrescente (dal più recente al più vecchio)
+                    // --- MODIFICA AGGIUNTA QUI: Pre-calcolo e Ordinamento ---
+                    const playersWithMaxDate = allIds.map(id => {
+                        const events = historyData[id];
+                        // Uso reduce in modo sicuro per trovare la data più recente, evitando crash o bug con array vuoti
+                        const maxDate = events.length > 0 
+                            ? events.reduce((max, current) => current.d > max ? current.d : max, 0)
+                            : 0;
+                        return { id: id, maxD: maxDate };
                     });
-                    // -----------------------------
 
-                    allIds.forEach(id => {
+                    // Ordiniamo gli oggetti pre-calcolati (estremamente veloce)
+                    playersWithMaxDate.sort((a, b) => b.maxD - a.maxD);
+                    // --------------------------------------------------------
+
+                    // Cicliamo sull'array ordinato, estraendo l'id
+                    playersWithMaxDate.forEach(item => {
+                        const id = item.id;
                         const playerEvents = historyData[id];
+                        
+                        // Ordina internamente gli eventi del singolo giocatore
                         playerEvents.sort((a, b) => b.d - a.d);
                         
                         let pName = "";
