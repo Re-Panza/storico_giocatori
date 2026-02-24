@@ -477,6 +477,17 @@
             "296": "Italia V"
         };
 
+        // Funzione per sterilizzare input ed evitare attacchi XSS
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function switchTab(tabId) {
             document.getElementById('sectionPlayer').classList.remove('active');
             document.getElementById('sectionWorld').classList.remove('active');
@@ -559,15 +570,14 @@
             
             resDiv.innerHTML = `<div style="text-align:center; color:var(--gold);">⏳ Ricerca nella biblioteca reale in corso...</div>`;
 
-            let urlCronologia, urlDatabase;
-            // Corretti i percorsi URL affinché cerchino esattamente i file come da tua direttiva
-            if (mondoStr === "327") {
-                urlCronologia = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/cronologia_327.json";
-                urlDatabase = "https://raw.githubusercontent.com/Re-Panza/lk_scanner/main/database_mondo_327.json";
-            } else {
-                urlCronologia = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/cronologia_${mondoStr}.json`;
-                urlDatabase = `https://raw.githubusercontent.com/Re-Panza/lk_database/main/database_mondo_${mondoStr}.json`;
-            }
+            // Setup dinamico e scalabile per i repository
+            const repoConfig = {
+                "327": "lk_scanner" // Aggiungi qui altri mondi se vanno su lk_scanner
+            };
+            const targetRepo = repoConfig[mondoStr] || "lk_database";
+            
+            const urlCronologia = `https://raw.githubusercontent.com/Re-Panza/${targetRepo}/main/cronologia_${mondoStr}.json`;
+            const urlDatabase = `https://raw.githubusercontent.com/Re-Panza/${targetRepo}/main/database_mondo_${mondoStr}.json`;
 
             try {
                 const [resCronologia, resDatabase] = await Promise.all([
@@ -583,7 +593,12 @@
                 
                 let playersDb = null;
                 if (resDatabase && resDatabase.ok) {
-                    playersDb = await resDatabase.json();
+                    // Protezione contro errori di formattazione del JSON database
+                    try {
+                        playersDb = await resDatabase.json();
+                    } catch (dbErr) {
+                        console.warn("Il database non è formattato correttamente, utilizzo i dati storici.");
+                    }
                 }
 
                 const playerMap = {};
@@ -594,7 +609,6 @@
                             let newA = parseInt(p.a) || 0;
                             let current = playerMap[String(id)] || { pn: "", an: "", a: 0 };
                             
-                            // Mappatura esclusiva su p.pn, p.an, p.a
                             playerMap[String(id)] = {
                                 pn: p.pn || current.pn,
                                 an: p.an || current.an,
@@ -652,7 +666,7 @@
 
                     resDiv.innerHTML += `
                         <div style="margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border);">
-                            <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${pName} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
+                            <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${escapeHTML(pName)} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+escapeHTML(pAlliance)+']' : ''}</span></div>
                             <div style="margin-top: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 4px;">
                                 <a href="l+k://player?${playerId}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${playerId}&${mondoStr}</a>
                                 ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
@@ -712,7 +726,7 @@
                         
                         pCard.innerHTML = `
                             <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 8px;">
-                                <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${pName} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+pAlliance+']' : ''}</span></div>
+                                <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${escapeHTML(pName)} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+escapeHTML(pAlliance)+']' : ''}</span></div>
                                 <div style="margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
                                     <a href="l+k://player?${id}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${id}&${mondoStr}</a>
                                     ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
@@ -727,7 +741,7 @@
 
             } catch (err) {
                 console.error(err);
-                resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${err.message}</span></div>`;
+                resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${escapeHTML(err.message)}</span></div>`;
             }
         }
 
@@ -742,17 +756,15 @@
                         <div class="history-date">📅 ${dataFormattata}</div>
                         <div class="history-content">
                             <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
-                            Da <span class="history-highlight">"${event.old}"</span> a <span class="history-highlight">"${event.new}"</span>
+                            Da <span class="history-highlight">"${escapeHTML(event.old)}"</span> a <span class="history-highlight">"${escapeHTML(event.new)}"</span>
                         </div>
                     `;
                 } else if (event.type === 'alliance') {
-                    // Utilizza solo i nomi estratti per le alleanze, mai gli ID numerici per la visualizzazione
                     const oldNameDisplay = event.old_name ? event.old_name : (event.old === 0 ? "Nessuna" : "Alleanza Rimossa");
                     const newNameDisplay = event.new_name ? event.new_name : (event.new === 0 ? "Nessuna" : "Alleanza Rimossa");
                     
-                    // Creazione dei link cliccabili con text-decoration:underline per renderli evidenti
-                    const oldLink = event.old !== 0 ? `<a href="l+k://alliance?${event.old}&${mondoStr}" style="color:inherit; text-decoration:underline;">${oldNameDisplay}</a>` : oldNameDisplay;
-                    const newLink = event.new !== 0 ? `<a href="l+k://alliance?${event.new}&${mondoStr}" style="color:inherit; text-decoration:underline;">${newNameDisplay}</a>` : newNameDisplay;
+                    const oldLink = event.old !== 0 ? `<a href="l+k://alliance?${event.old}&${mondoStr}" style="color:inherit; text-decoration:underline;">${escapeHTML(oldNameDisplay)}</a>` : escapeHTML(oldNameDisplay);
+                    const newLink = event.new !== 0 ? `<a href="l+k://alliance?${event.new}&${mondoStr}" style="color:inherit; text-decoration:underline;">${escapeHTML(newNameDisplay)}</a>` : escapeHTML(newNameDisplay);
 
                     let textDesc = "";
                     if (event.old === 0) {
