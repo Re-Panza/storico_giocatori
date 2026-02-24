@@ -40,9 +40,9 @@
         body {
             margin: 0;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(1200px 600px at 20% 0%, rgba(96, 165, 250, .25), transparent 60%),
-                radial-gradient(1000px 500px at 90% 10%, rgba(52, 211, 153, .18), transparent 55%),
-                var(--bg);
+            background: radial-gradient(circle at top right, rgba(96, 165, 250, 0.12), transparent 50%), 
+                        radial-gradient(circle at bottom left, rgba(52, 211, 153, 0.08), transparent 50%), 
+                        var(--bg);
             color: var(--text);
             padding: env(safe-area-inset-top, 20px) 20px 40px 20px;
             -webkit-user-select: none;
@@ -282,117 +282,6 @@
             font-size: 18px;
             margin-right: 6px;
         }
-
-        .paypal-footer {
-            text-align: center;
-            margin-top: 60px;
-            padding: 30px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .paypal-link {
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            color: #fff !important;
-            background: #0070ba;
-            padding: 12px 28px;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 112, 186, 0.3);
-            border: none;
-        }
-
-        /* --- STILE ASSISTENTE --- */
-        #ai-assistant-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        #ai-button {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-            border: 2px solid var(--accent);
-        }
-
-        #ai-button img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #ai-window {
-            display: none;
-            position: absolute;
-            bottom: 85px;
-            right: 0;
-            width: 85vw;
-            max-width: 320px;
-            background: var(--card);
-            border: 1px solid var(--accent);
-            border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-        }
-
-        .ai-header {
-            color: var(--accent);
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
-
-        #ai-content {
-            max-height: 250px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            font-size: 13px;
-            color: var(--text);
-        }
-
-        .ai-input-area {
-            display: flex;
-            gap: 5px;
-            border-top: 1px solid var(--border);
-            padding-top: 10px;
-        }
-
-        #ai-input {
-            flex: 1;
-            background: #000;
-            border: 1px solid var(--border);
-            color: #fff;
-            border-radius: 5px;
-            padding: 8px;
-            font-size: 12px;
-        }
-
-        #ai-send-btn {
-            background: var(--accent);
-            border: none;
-            border-radius: 5px;
-            padding: 5px 15px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #000;
-        }
     </style>
 </head>
 
@@ -438,34 +327,6 @@
         <div id="risultati"></div>
     </div>
 
-    <footer class="paypal-footer">
-        <p style="font-size:12px; color:#93a4c7; margin-bottom:8px; font-family: sans-serif;">
-            Ti piace questo strumento?
-        </p>
-        <a href="https://paypal.me/Longo11" target="_blank" class="paypal-link">
-            ☕ Offrimi un caffè su PayPal
-        </a>
-    </footer>
-
-    <div id="ai-assistant-container">
-        <div id="ai-window">
-            <div class="ai-header">
-                <span>👑 Assistente Re Panza</span>
-                <span onclick="toggleAI()" style="cursor:pointer">×</span>
-            </div>
-            <div id="ai-content">
-                <p>Ciao! Sono Re Panza AI. Chiedimi pure consiglio se non comprendi il gioco, oppure chiacchieriamo un pò.</p>
-            </div>
-            <div class="ai-input-area">
-                <input type="text" id="ai-input" placeholder="Scrivi al Re...">
-                <button id="ai-send-btn" onclick="chiediAlRe()">Invia</button>
-            </div>
-        </div>
-        <div id="ai-button" onclick="toggleAI()">
-            <img src="https://re-panza.github.io/lk_tool/re-panza-ai.png" alt="Re Panza AI">
-        </div>
-    </div>
-
     <script src="https://re-panza.github.io/lk_tool/common.js"></script>
 
     <script>
@@ -476,17 +337,6 @@
             "343": "Italia VII (regioni)",
             "296": "Italia V"
         };
-
-        // Funzione per sterilizzare input ed evitare attacchi XSS
-        function escapeHTML(str) {
-            if (str === null || str === undefined) return "";
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
 
         function switchTab(tabId) {
             document.getElementById('sectionPlayer').classList.remove('active');
@@ -535,9 +385,9 @@
                     return;
                 }
 
-                let parsedLink = typeof parseLK === 'function' ? parseLK(input) : null;
-                if (!parsedLink && typeof parseInputLink === 'function') {
-                    let p = parseInputLink(input);
+                let parsedLink = typeof window.parseLK === 'function' ? window.parseLK(input) : null;
+                if (!parsedLink && typeof window.parseInputLink === 'function') {
+                    let p = window.parseInputLink(input);
                     if (p && p.type === 'player') parsedLink = { p: p.id, w: p.w };
                 }
 
@@ -570,9 +420,8 @@
             
             resDiv.innerHTML = `<div style="text-align:center; color:var(--gold);">⏳ Ricerca nella biblioteca reale in corso...</div>`;
 
-            // Setup dinamico e scalabile per i repository
             const repoConfig = {
-                "327": "lk_scanner" // Aggiungi qui altri mondi se vanno su lk_scanner
+                "327": "lk_scanner" 
             };
             const targetRepo = repoConfig[mondoStr] || "lk_database";
             
@@ -593,7 +442,6 @@
                 
                 let playersDb = null;
                 if (resDatabase && resDatabase.ok) {
-                    // Protezione contro errori di formattazione del JSON database
                     try {
                         playersDb = await resDatabase.json();
                     } catch (dbErr) {
@@ -666,7 +514,7 @@
 
                     resDiv.innerHTML += `
                         <div style="margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border);">
-                            <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${escapeHTML(pName)} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+escapeHTML(pAlliance)+']' : ''}</span></div>
+                            <div style="font-size: 18px; font-weight: 800; color: #fff;">👤 ${window.escapeHTML(pName)} <span style="font-size: 14px; font-weight: normal; color: var(--gold);">${pAlliance ? '['+window.escapeHTML(pAlliance)+']' : ''}</span></div>
                             <div style="margin-top: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 4px;">
                                 <a href="l+k://player?${playerId}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${playerId}&${mondoStr}</a>
                                 ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
@@ -689,26 +537,20 @@
 
                     resDiv.innerHTML += `<div style="margin-bottom: 16px; font-size: 16px; font-weight: bold; color: var(--success);">🌐 Trovati ${allIds.length} giocatori nel mondo ${displayWorldName}:</div>`;
 
-                    // --- MODIFICA AGGIUNTA QUI: Pre-calcolo e Ordinamento ---
                     const playersWithMaxDate = allIds.map(id => {
                         const events = historyData[id];
-                        // Uso reduce in modo sicuro per trovare la data più recente, evitando crash o bug con array vuoti
                         const maxDate = events.length > 0 
                             ? events.reduce((max, current) => current.d > max ? current.d : max, 0)
                             : 0;
                         return { id: id, maxD: maxDate };
                     });
 
-                    // Ordiniamo gli oggetti pre-calcolati (estremamente veloce)
                     playersWithMaxDate.sort((a, b) => b.maxD - a.maxD);
-                    // --------------------------------------------------------
 
-                    // Cicliamo sull'array ordinato, estraendo l'id
                     playersWithMaxDate.forEach(item => {
                         const id = item.id;
                         const playerEvents = historyData[id];
                         
-                        // Ordina internamente gli eventi del singolo giocatore
                         playerEvents.sort((a, b) => b.d - a.d);
                         
                         let pName = "";
@@ -744,7 +586,7 @@
                         
                         pCard.innerHTML = `
                             <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 8px;">
-                                <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${escapeHTML(pName)} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+escapeHTML(pAlliance)+']' : ''}</span></div>
+                                <div style="font-size: 16px; font-weight: bold; color: #fff;">👤 ${window.escapeHTML(pName)} <span style="font-size: 13px; color: var(--gold); font-weight: normal;">${pAlliance ? '['+window.escapeHTML(pAlliance)+']' : ''}</span></div>
                                 <div style="margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
                                     <a href="l+k://player?${id}&${mondoStr}" style="color: var(--accent); text-decoration: underline; word-break: break-all;">l+k://player?${id}&${mondoStr}</a>
                                     ${pAllianceId && parseInt(pAllianceId, 10) !== 0 ? `<a href="l+k://alliance?${pAllianceId}&${mondoStr}" style="color: var(--gold); text-decoration: underline; word-break: break-all;">l+k://alliance?${pAllianceId}&${mondoStr}</a>` : ''}
@@ -759,7 +601,7 @@
 
             } catch (err) {
                 console.error(err);
-                resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${escapeHTML(err.message)}</span></div>`;
+                resDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px; border:1px solid rgba(239,68,68,0.3); border-radius:16px; background:rgba(239,68,68,0.1);">⚠️ Errore durante il caricamento della cronologia.<br><br><span style="font-size:12px; color:#fff">${window.escapeHTML(err.message)}</span></div>`;
             }
         }
 
@@ -774,15 +616,15 @@
                         <div class="history-date">📅 ${dataFormattata}</div>
                         <div class="history-content">
                             <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
-                            Da <span class="history-highlight">"${escapeHTML(event.old)}"</span> a <span class="history-highlight">"${escapeHTML(event.new)}"</span>
+                            Da <span class="history-highlight">"${window.escapeHTML(event.old)}"</span> a <span class="history-highlight">"${window.escapeHTML(event.new)}"</span>
                         </div>
                     `;
                 } else if (event.type === 'alliance') {
                     const oldNameDisplay = event.old_name ? event.old_name : (event.old === 0 ? "Nessuna" : "Alleanza Rimossa");
                     const newNameDisplay = event.new_name ? event.new_name : (event.new === 0 ? "Nessuna" : "Alleanza Rimossa");
                     
-                    const oldLink = event.old !== 0 ? `<a href="l+k://alliance?${event.old}&${mondoStr}" style="color:inherit; text-decoration:underline;">${escapeHTML(oldNameDisplay)}</a>` : escapeHTML(oldNameDisplay);
-                    const newLink = event.new !== 0 ? `<a href="l+k://alliance?${event.new}&${mondoStr}" style="color:inherit; text-decoration:underline;">${escapeHTML(newNameDisplay)}</a>` : escapeHTML(newNameDisplay);
+                    const oldLink = event.old !== 0 ? `<a href="l+k://alliance?${event.old}&${mondoStr}" style="color:inherit; text-decoration:underline;">${window.escapeHTML(oldNameDisplay)}</a>` : window.escapeHTML(oldNameDisplay);
+                    const newLink = event.new !== 0 ? `<a href="l+k://alliance?${event.new}&${mondoStr}" style="color:inherit; text-decoration:underline;">${window.escapeHTML(newNameDisplay)}</a>` : window.escapeHTML(newNameDisplay);
 
                     let textDesc = "";
                     if (event.old === 0) {
