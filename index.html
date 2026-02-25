@@ -605,6 +605,7 @@
             }
         }
 
+        // --- FIX DEL BUG "name_and_alliance" ---
         function renderEvents(events, container, playerId, mondoStr) {
             events.forEach(event => {
                 const dataFormattata = formatTimestamp(event.d);
@@ -619,7 +620,8 @@
                             Da <span class="history-highlight">"${window.escapeHTML(event.old)}"</span> a <span class="history-highlight">"${window.escapeHTML(event.new)}"</span>
                         </div>
                     `;
-                } else if (event.type === 'alliance') {
+                } 
+                else if (event.type === 'alliance') {
                     const oldNameDisplay = event.old_name ? event.old_name : (event.old === 0 ? "Nessuna" : "Alleanza Rimossa");
                     const newNameDisplay = event.new_name ? event.new_name : (event.new === 0 ? "Nessuna" : "Alleanza Rimossa");
                     
@@ -641,9 +643,42 @@
                             <span class="history-type-icon">🛡️</span> ${textDesc}
                         </div>
                     `;
+                } 
+                // NUOVO BLOCCO: Gestione corretta per name_and_alliance
+                else if (event.type === 'name_and_alliance') {
+                    const oldAllyDisplay = event.old_ally_name ? event.old_ally_name : (event.old_ally === 0 ? "Nessuna" : "Alleanza Rimossa");
+                    const newAllyDisplay = event.new_ally_name ? event.new_ally_name : (event.new_ally === 0 ? "Nessuna" : "Alleanza Rimossa");
+                    
+                    const oldLink = event.old_ally !== 0 ? `<a href="l+k://alliance?${event.old_ally}&${mondoStr}" style="color:inherit; text-decoration:underline;">${window.escapeHTML(oldAllyDisplay)}</a>` : window.escapeHTML(oldAllyDisplay);
+                    const newLink = event.new_ally !== 0 ? `<a href="l+k://alliance?${event.new_ally}&${mondoStr}" style="color:inherit; text-decoration:underline;">${window.escapeHTML(newAllyDisplay)}</a>` : window.escapeHTML(newAllyDisplay);
+
+                    let textDescAlly = "";
+                    if (event.old_ally === 0) {
+                        textDescAlly = `È entrato nell'alleanza <span class="history-highlight">${newLink}</span>`;
+                    } else if (event.new_ally === 0) {
+                        textDescAlly = `Ha lasciato l'alleanza <span class="history-highlight">${oldLink}</span>`;
+                    } else {
+                        textDescAlly = `Ha cambiato alleanza: Da <span class="history-highlight">${oldLink}</span> a <span class="history-highlight">${newLink}</span>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="history-date">📅 ${dataFormattata}</div>
+                        <div class="history-content">
+                            <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span class="history-type-icon">👤</span> Ha cambiato nome:<br>
+                                Da <span class="history-highlight">"${window.escapeHTML(event.old_name)}"</span> a <span class="history-highlight">"${window.escapeHTML(event.new_name)}"</span>
+                            </div>
+                            <div>
+                                <span class="history-type-icon">🛡️</span> ${textDescAlly}
+                            </div>
+                        </div>
+                    `;
                 }
-                
-                container.appendChild(div);
+
+                // Evita di iniettare box vuoti se c'è un tipo evento sconosciuto
+                if (div.innerHTML.trim() !== '') {
+                    container.appendChild(div);
+                }
             });
         }
     </script>
